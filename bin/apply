@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Install systemd/override.conf onto this host, back up the old one, restart Ollama, verify.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+DST=/etc/systemd/system/ollama.service.d/override.conf
+if sudo cmp -s systemd/override.conf "$DST"; then echo "already in sync"; exit 0; fi
+diff -u "$DST" systemd/override.conf || true
+read -rp "Apply and restart ollama? [y/N] " a; [[ $a == y ]] || exit 1
+sudo cp "$DST" "$DST.bak-$(date +%Y%m%d-%H%M%S)"
+sudo cp systemd/override.conf "$DST"
+sudo systemctl daemon-reload && sudo systemctl restart ollama; T=$(date '+%H:%M:%S')
+until curl -sf localhost:11434/api/version >/dev/null; do sleep 1; done
+MODEL=${1:-qwen3-coder:30b}
+curl -s localhost:11434/api/generate -d "{\"model\":\"$MODEL\",\"prompt\":\"hi\",\"stream\":false,\"options\":{\"num_predict\":1}}" >/dev/null
+journalctl -u ollama --since "$T" --no-pager | grep -oE 'using device [^ ]+ \([^)]+\)' | head -1
+ollama ps

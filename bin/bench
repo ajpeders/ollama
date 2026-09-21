@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# usage: bin/bench [MODEL] [LABEL]
+# Short prompt + ~8.6k-token prompt (bench/long-prompt.txt), 3 runs each, 256 tokens out.
+# Each run's prompt starts differently, so the prompt cache never skips prefill.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+M=${1:-qwen3-coder:30b}; L=${2:-run}
+LONG=$(cat bench/long-prompt.txt)
+run() { curl -s localhost:11434/api/generate -d "$(jq -n --arg m "$M" --arg p "$1" '{model:$m,prompt:$p,stream:false,options:{num_predict:256,temperature:0,seed:1}}')" \
+  | jq -r --arg t "$2" --arg l "$L" '"\($l) \($t) prefill=\(.prompt_eval_count)tok \((.prompt_eval_count/(.prompt_eval_duration/1e9))|floor)t/s  gen=\((.eval_count/(.eval_duration/1e9))*10|floor/10)t/s  ttft=\((.prompt_eval_duration/1e6)|floor)ms"'; }
+run "warmup" warmup >/dev/null
+for i in 1 2 3; do run "Write a Python function that parses an ISO 8601 duration string. Run $i" short; done
+for i in 1 2 3; do run "Run $i. Review this code and summarize it:\n$LONG" long; done
