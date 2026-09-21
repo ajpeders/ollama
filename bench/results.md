@@ -13,3 +13,28 @@ Model: `qwen3-coder:30b`, 98k context, flash attention on. Generated with `bin/b
 | Vulkan (RADV), KV q8_0 | 157 t/s | 134 t/s | ~3.7k t/s |
 
 `num_batch` 512/1024/2048: no gain over the default. Changing it forces a model reload.
+
+## 2026-09-20 — backend at agent depth (`bin/bench-depth`)
+
+The 2026-09-19 server spec found ROCm prefill ~2x faster than Vulkan at 11–22k tokens. That no longer reproduces:
+the old Vulkan numbers likely predate `num_batch 2048` being baked into the qwen3-coder tag.
+
+| Depth | Backend | Prefill | Gen | TTFT |
+|---|---|---|---|---|
+| 26k | ROCm | 2,443 t/s | 74 t/s | 10.5 s |
+| 26k | **Vulkan** | **2,535 t/s** | **97 t/s** | 10.1 s |
+| 52k | ROCm | 1,521 t/s | 57 t/s | 33.9 s |
+| 52k | **Vulkan** | **1,625 t/s** | **70 t/s** | 31.7 s |
+
+## 2026-09-20 — prompt cache (`bin/bench-cache`)
+
+llama-server keeps inactive conversations in a host-RAM prompt cache (default 8 GiB; Ollama has no knob,
+but passes `LLAMA_ARG_CACHE_RAM` through). Test: 4 conversations of ~26k tokens (~2.4 GB KV each), then one follow-up each.
+
+| Cache RAM | Follow-up prefill |
+|---|---|
+| 8 GiB (default) | 10.5 s each: all 4 reprocessed (round-robin over > capacity = 0% LRU hits) |
+| **12 GiB** ← live | **0 s each** |
+
+Real traffic before the change (3 days of logs): 220 of 502 coder requests over 2k tokens were full reprocesses,
+~1.9 h of prefill in total. Two alternating conversations were already fine at 8 GiB.

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# usage: bin/bench-cache LABEL -> 4 distinct ~26k-token conversations A..D, then one follow-up each.
+# Follow-up time ~0s = conversation was still cached; ~10s = reprocessed from scratch.
+L=$1; S=$(date +%s%N); C="$(dirname "$0")/../bench/long-prompt.txt"; T=$(mktemp -d)
+mk() { { echo "[conv $1 $S] Review this code:"; cat $C $C $C; [ -n "$2" ] && echo "Follow-up: $2"; } > $T/mc-$1.txt; }
+send() { jq -n --rawfile p $T/mc-$1.txt '{model:"qwen3-coder:30b",prompt:$p,stream:false,raw:true,options:{num_predict:16,temperature:0}}' \
+  | curl -s localhost:11434/api/generate -d @- | jq -r '(.prompt_eval_duration/1e9)*10|floor/10'; }
+first=""; follow=""
+for c in A B C D; do mk $c; first+="$c=$(send $c)s "; done
+for c in A B C D; do mk $c "list the functions"; follow+="$c'=$(send $c)s "; done
+echo "$L | first: $first| follow-ups: $follow"

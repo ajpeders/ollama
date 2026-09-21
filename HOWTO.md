@@ -19,3 +19,10 @@ ls /etc/systemd/system/ollama.service.d/          # pick a .bak-* file
 sudo cp <backup> /etc/systemd/system/ollama.service.d/override.conf
 sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
+
+## Check prompt-cache hit rate from real traffic
+Each request logs its prompt size and how many tokens were actually processed. Their difference is what came from the cache:
+```sh
+journalctl -u ollama --since -1d -o cat | grep -E 'task\.n_tokens|prompt eval time' | less
+# "task.n_tokens = N" then "prompt eval time = … / M tokens": M ≈ N means a miss, M ≪ N means a hit
+```

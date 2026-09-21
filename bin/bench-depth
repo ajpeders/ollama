@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# usage: bin/bench-depth LABEL -> prefill/gen at ~26k and ~52k tokens, 2 runs each (nonce-prefixed, no cache hits)
+L=$1; F=$(mktemp)
+for mult in 3 6; do
+  for r in 1 2; do
+    { echo "[$(date +%s%N)] Summarize this code:"; for i in $(seq $mult); do cat "$(dirname "$0")/../bench/long-prompt.txt"; done; } > $F
+    jq -n --rawfile p $F '{model:"qwen3-coder:30b",prompt:$p,stream:false,options:{num_predict:128,temperature:0}}' \
+    | curl -s localhost:11434/api/generate -d @- \
+    | jq -r --arg l "$L" '"\($l) depth=\(.prompt_eval_count) prefill=\((.prompt_eval_count/(.prompt_eval_duration/1e9))|floor)t/s gen=\((.eval_count/(.eval_duration/1e9))*10|floor/10)t/s ttft=\((.prompt_eval_duration/1e9)*10|floor/10)s"'
+  done; done

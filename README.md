@@ -15,5 +15,7 @@ bin/apply                      # push systemd/override.conf to /etc, restart, ve
 - `systemd/override.conf`: source of truth for the `ollama.service` drop-in
 - `bin/apply`: diff, back up, install, restart, and print which GPU backend loaded
 - `bin/bench`: repeatable speed benchmark (see [bench/results.md](bench/results.md))
+- `bin/bench-depth`: prefill/generation at ~26k and ~52k tokens (agent depths)
+- `bin/bench-cache`: 4 interleaved conversations; shows whether the prompt cache holds them
 
 Secrets (`/etc/ollama/cloud.env`) are referenced but never stored here.
