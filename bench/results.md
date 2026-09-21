@@ -38,3 +38,9 @@ but passes `LLAMA_ARG_CACHE_RAM` through). Test: 4 conversations of ~26k tokens 
 
 Real traffic before the change (3 days of logs): 220 of 502 coder requests over 2k tokens were full reprocesses,
 ~1.9 h of prefill in total. Two alternating conversations were already fine at 8 GiB.
+
+## Fixture note (2026-09-21)
+
+`bench/long-prompt.txt` is now public Python stdlib source (json, textwrap, shlex, bisect, heapq; PSF license),
+8,684 tokens. It replaced a fixture of private project code throughout the history. Same-config check: 3,846 t/s prefill /
+133 t/s gen vs 3,700–3,800 / 134 with the old fixture, so earlier numbers remain comparable.
