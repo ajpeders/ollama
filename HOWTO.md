@@ -21,6 +21,7 @@ sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
 ## Check prompt-cache hit rate from real traffic
+`bin/report -3d` gives the summary (plus evictions and prompt sizes). To dig into single requests:
 Each request logs its prompt size and how many tokens were actually processed. Their difference is what came from the cache:
 ```sh
 journalctl -u ollama --since -1d -o cat | grep -E 'task\.n_tokens|prompt eval time' | less
