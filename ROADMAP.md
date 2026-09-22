@@ -10,6 +10,7 @@
 - 2026-09-22: the 3 `qwen3:8b` loads on 09-21 came from an out-of-date opencode-serve. It started (09-20 21:34) before the explore/scout fix (22:30) and kept the old config until it restarted at 09-21 14:42. None since. Lesson: restart `opencode-serve` after editing opencode.json.
 - 2026-09-22: all locally customized tags are tracked in `models/`: qwen2.5:7b-instruct, qwen3-coder:30b (its num_batch 2048 is local; the library tag has none), and qwen3:8b-32k. Each was checked by building from its Modelfile and diffing the params.
 - 2026-09-22: `claude-local` moved to qwen3-coder:30b (dotfiles 3df955f). The launcher passes `$PWD` via `--append-system-prompt`, which fixed the wrong-path guessing: 4/4 sandboxed runs clean, 34–49 s vs 144 s on the 27B. It also now declares 98k context (was 131k, which let prompts overflow the server's window). `bin/report` counts loads by blob, because qwen3.6 and glm-4.7-flash log no name.
+- 2026-09-22: opencode `debug` moved to the coder (dotfiles f83c6f0), so nothing uses qwen3.6:27b by default. On a sandboxed root-cause test, the coder failed 0/3 because it went looking in /var/log. A "start in the working directory" step in its prompt fixed it: 3/3 in 8–18 s, vs 3/3 in 35–47 s on the 27B.
 
 ## Next
-- opencode `debug` is the last qwen3.6:27b user, so the last source of swaps. It could move to the coder the same way, after a sandboxed opencode test. Re-check the swap and cache-hit logs (HOWTO) if something feels slow.
+- **2026-09-25:** run `bin/report 2026-09-22T05:00`. Expect qwen3-coder:30b loads ≈ restarts only, no qwen3.6:27b loads, and qwen2.5 loads without matching coder reloads. Re-check the swap and cache-hit logs (HOWTO) if something feels slow.
