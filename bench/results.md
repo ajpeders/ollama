@@ -44,3 +44,18 @@ Real traffic before the change (3 days of logs): 220 of 502 coder requests over 
 `bench/long-prompt.txt` is now public Python stdlib source (json, textwrap, shlex, bisect, heapq; PSF license),
 8,684 tokens. It replaced a fixture of private project code throughout the history. Same-config check: 3,846 t/s prefill /
 133 t/s gen vs 3,700–3,800 / 134 with the old fixture, so earlier numbers remain comparable.
+
+## KV cache f16 → q8_0 (2026-09-22)
+
+Goal: stop isis's qwen2.5:7b-instruct evicting the coder (4 of 6 real coder reloads 09-21..22).
+
+| KV | short gen | long gen (8.6k) | prefill | coder KV | coder total (`ollama ps`) |
+|---|---|---|---|---|---|
+| f16 | 168 t/s | 132 t/s | 3.8k t/s | 9216 MiB | ~27 GB |
+| **q8_0** ← live | 157 t/s | 133 t/s | 3.8k t/s | 4896 MiB | 24 GB |
+
+Matches the 09-20 numbers. **But the eviction persists:** with the coder loaded, the scheduler reports 7.1 GiB
+available and still evicts for qwen2.5:7b (predicted 6.1 GiB at 32k ctx), so it needs about 1 GiB more headroom.
+The desktop holds ~2.2 GiB of VRAM (32624 total, 30404 MiB free before any model loads).
+
+Real prompt sizes since 09-19 (1608 requests): p50 18.8k, p90 52.6k, p99 96.6k; 43 were over 80k.
