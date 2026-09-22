@@ -26,3 +26,10 @@ Each request logs its prompt size and how many tokens were actually processed. T
 journalctl -u ollama --since -1d -o cat | grep -E 'task\.n_tokens|prompt eval time' | less
 # "task.n_tokens = N" then "prompt eval time = … / M tokens": M ≈ N means a miss, M ≪ N means a hit
 ```
+
+## Rebuild a customized model tag
+`ollama pull` resets a tag to the library version and drops local parameters. Afterwards, re-apply the local ones:
+```sh
+for f in models/*.Modelfile; do sh -c "$(sed -n 's/^# Rebuild: //p' "$f")"; done
+```
+Don't test a Modelfile by building it under a temp name and running `ollama rm` on it while the real model is loaded. They share a blob, so the rm unloads the live model too.

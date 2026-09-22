@@ -1,0 +1,5 @@
+# Rebuild: ollama create qwen3-coder:30b -f models/qwen3-coder-30b.Modelfile
+# The library tag has no num_batch, and `ollama pull` drops this. 2048 gives 3.78k t/s long-prompt prefill
+# vs 3.43k at 1024 and 2.94k at 512 (bench/results.md, 2026-09-22).
+FROM qwen3-coder:30b
+PARAMETER num_batch 2048
