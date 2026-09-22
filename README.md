@@ -17,5 +17,6 @@ bin/apply                      # push systemd/override.conf to /etc, restart, ve
 - `bin/bench`: repeatable speed benchmark (see [bench/results.md](bench/results.md))
 - `bin/bench-depth`: prefill/generation at ~26k and ~52k tokens (agent depths)
 - `bin/bench-cache`: 4 interleaved conversations; shows whether the prompt cache holds them
+- `models/`: Modelfiles for tags customized on this host (rebuild command is in each file)
 
 Secrets (`/etc/ollama/cloud.env`) are referenced but never stored here.

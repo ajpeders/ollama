@@ -59,3 +59,12 @@ available and still evicts for qwen2.5:7b (predicted 6.1 GiB at 32k ctx), so it 
 The desktop holds ~2.2 GiB of VRAM (32624 total, 30404 MiB free before any model loads).
 
 Real prompt sizes since 09-19 (1608 requests): p50 18.8k, p90 52.6k, p99 96.6k; 43 were over 80k.
+
+### Fix: qwen2.5:7b-instruct at 16k ctx (2026-09-22)
+
+The client is carSearch (6-hourly auto-refresh, `/v1/chat/completions`, prompts ≤1.4k tokens), plus gym-app.
+`/v1` can't pass `num_ctx`, so it's baked into the tag (`models/qwen2.5-7b-instruct.Modelfile`): 5.0 GB instead of 5.7 GB.
+Coder then `/v1` qwen2.5 then coder again: both stay loaded, no evictions.
+
+Coder num_batch was also tried as a lever (compute buffer, long prefill): 2048 = 720 MiB, 3.78k t/s; 1024 = 360 MiB,
+3.43k t/s; 512 = 180 MiB, 2.94k t/s. Gen was 133 t/s at every setting. Not needed, so it stays at 2048.

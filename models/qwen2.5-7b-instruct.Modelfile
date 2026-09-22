@@ -1,0 +1,5 @@
+# Rebuild: ollama create qwen2.5:7b-instruct -f models/qwen2.5-7b-instruct.Modelfile
+# Callers (carSearch, gym-app) use /v1/chat/completions, which can't set num_ctx.
+# At the default 32k it doesn't fit beside qwen3-coder:30b and evicts it. Real prompts are ≤1.4k tokens.
+FROM qwen2.5:7b-instruct
+PARAMETER num_ctx 16384
