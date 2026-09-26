@@ -1,4 +1,0 @@
-# Rebuild: ollama create qwen3:8b-32k -f models/qwen3-8b-32k.Modelfile
-# qwen3:8b at its full trained context. Unused since opencode explore/scout moved to the coder (2026-09-20).
-FROM qwen3:8b
-PARAMETER num_ctx 32768
