@@ -1,5 +1,8 @@
 # Roadmap
 
+**Retired 2026-09-26.** Ollama was replaced by llama-swap (`/srv/projects/llama-swap`); nothing
+below is open work any more.
+
 ## Done
 - 2026-09-20: back to Vulkan from ROCm (+50% gen t/s); repo created; benchmark harness.
 - 2026-09-20: opencode explore/scout moved off qwen3:8b-32k onto the coder (dotfiles f678cca). They were evicting the coder, 5 swaps in 12 min. Only `debug` and `claude-local` (qwen3.6:27b) still cause swaps.

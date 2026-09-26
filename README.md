@@ -1,5 +1,9 @@
 # ollama
 
+> **Retired 2026-09-26.** Ollama is stopped and disabled on luna. llama-swap now serves
+> :11434 with the OpenAI and Anthropic APIs; see `/srv/projects/llama-swap`. This repo is
+> kept for its benchmark history and the settings that were carried over.
+
 Config and benchmarks for the Ollama server on ArchDesktop (Radeon AI PRO R9700, 32 GB).
 It serves the homelab via llm-router, Open WebUI and `ollama.thelunadog.com`.
 
